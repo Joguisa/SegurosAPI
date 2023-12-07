@@ -2,7 +2,7 @@
 {
     public class ClienteDTO
     {
-        public int id;
+        internal int id;
         public string Cedula { get; set; } = null!;
         public string NombreCliente { get; set; } = null!;
         public string Telefono { get; set; } = null!;

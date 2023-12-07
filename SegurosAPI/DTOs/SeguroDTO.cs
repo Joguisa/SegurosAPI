@@ -2,7 +2,7 @@
 {
     public class SeguroDTO
     {
-        public int id;
+        internal int id;
         public string NombreSeguro { get; set; } = null!;
         public string CodigoSeguro { get; set; } = null!;
         public decimal SumaAsegurada { get; set; }

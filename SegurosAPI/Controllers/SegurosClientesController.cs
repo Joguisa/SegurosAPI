@@ -26,7 +26,7 @@ namespace SegurosAPI.Controllers
             try
             {
                 var asegurados = await aseguradosService.GetSegurosClientesList();
-                return asegurados;
+                return Ok(asegurados);
 
             }
             catch (ArgumentException ex)
@@ -35,31 +35,68 @@ namespace SegurosAPI.Controllers
             }
         }
 
-
-
         // GET api/<SegurosClientesController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet("{id}", Name = "GetAseguradosById")]
+        public async Task<ActionResult<SegurosClienteDTO>> GetAseguradosById(int id)
         {
-            return "value";
+            try
+            {
+                var asegurados = await aseguradosService.GetSegurosCliente(id);
+                return asegurados != null
+                    ? Ok(asegurados)
+                    : NotFound($"No existe un asegurado con ese id: {id}");
+            } catch(ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        // POST api/<SegurosClientesController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<ActionResult<SegurosClienteDTO>> AddSegurosCliente([FromBody] CrearAseguradoDTO modelo)
         {
+            try
+            {
+                var asegurados = await aseguradosService.AddSegurosCliente(modelo);
+                return Ok();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
+
 
         // PUT api/<SegurosClientesController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut("{id}", Name = "PutAsegurado")]
+        public async Task<ActionResult> PutAsegurado([FromBody] CrearAseguradoDTO modelo, int id)
         {
+            try
+            {
+                await aseguradosService.UpdateSegurosCliente(modelo, id);
+                return NoContent();
+
+            } catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // DELETE api/<SegurosClientesController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete("{id}", Name = "DeleteAsegurado")]
+        public async Task<ActionResult> DeleteAsegurado(int id)
         {
+            try
+            {
+                await aseguradosService.DeleteSegurosCliente(id);
+                return NoContent();
+            } catch(ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

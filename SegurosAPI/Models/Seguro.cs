@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace SegurosAPI.Models
 {
@@ -15,7 +16,7 @@ namespace SegurosAPI.Models
         public string CodigoSeguro { get; set; } = null!;
         public decimal SumaAsegurada { get; set; }
         public decimal Prima { get; set; }
-
+        [JsonIgnore]
         public virtual ICollection<SegurosCliente> SegurosClientes { get; set; }
     }
 }

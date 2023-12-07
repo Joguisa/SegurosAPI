@@ -20,6 +20,8 @@ builder.Services.AddDbContext<DBSegurosContext>(options =>
 // 
 builder.Services.AddScoped<ICliente, ClienteService>();
 builder.Services.AddScoped<ISeguro, SeguroService>();
+builder.Services.AddScoped<ISegurosClientes, SegurosClienteServicio>();
+
 
 var app = builder.Build();
 

@@ -16,5 +16,6 @@ namespace SegurosAPI.Models
         public string Telefono { get; set; } = null!;
         public int Edad { get; set; }
         public virtual ICollection<SegurosCliente> SegurosClientes { get; set; }
+
     }
 }

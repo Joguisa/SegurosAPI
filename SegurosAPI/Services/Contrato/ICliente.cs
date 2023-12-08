@@ -5,10 +5,10 @@ namespace SegurosAPI.Services.Contrato
 {
     public interface ICliente
     {
-        Task<List<ClienteDTO>> GetList();
-        Task<ClienteDTO?> Get(int idCliente);
-        Task<ClienteDTO> Add(ClienteDTO modelo);
-        Task<bool> Update(ClienteDTO modelo, int id);
+        Task<List<ClienteDto>> GetList();
+        Task<ClienteDto?> Get(int idCliente);
+        Task<ClienteDto> Add(ClienteDto modelo);
+        Task<bool> Update(ClienteDto modelo, int id);
         Task<bool> Delete(int id);
     }
 }

@@ -4,10 +4,10 @@ namespace SegurosAPI.Services.Contrato
 {
     public interface ISeguro
     {
-        Task<List<SeguroDTO>> GetList();
-        Task<SeguroDTO> Get(int idSeguro);
-        Task<SeguroDTO> Add(SeguroDTO modelo);
-        Task<bool> Update(SeguroDTO modelo, int idSeguro);
+        Task<List<SeguroDto>> GetList();
+        Task<SeguroDto> Get(int idSeguro);
+        Task<SeguroDto> Add(SeguroDto modelo);
+        Task<bool> Update(SeguroDto modelo, int idSeguro);
         Task<bool> Delete(int idSeguro);
 
     }

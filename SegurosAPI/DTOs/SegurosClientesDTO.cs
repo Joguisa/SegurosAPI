@@ -2,10 +2,10 @@
 
 namespace SegurosAPI.DTOs
 {
-    public class SegurosClienteDTO
+    public class SegurosClienteDto
     {
         public int Id { get; set; }
-        public ClienteDTO? Cliente { get; set; } = null!;
-        public SeguroDTO? Seguro { get; set; } = null!;
+        public ClienteDto? Cliente { get; set; } = null!;
+        public SeguroDto? Seguro { get; set; } = null!;
     }
 }

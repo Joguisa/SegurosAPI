@@ -1,8 +1,8 @@
 ﻿namespace SegurosAPI.DTOs
 {
-    public class ClienteDTO
+    public class ClienteDto
     {
-        internal int id;
+        internal int Id;
         public string Cedula { get; set; } = null!;
         public string NombreCliente { get; set; } = null!;
         public string Telefono { get; set; } = null!;

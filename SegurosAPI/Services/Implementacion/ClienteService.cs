@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SegurosAPI.DTOs;
 using SegurosAPI.Models;
 using SegurosAPI.Services.Contrato;
@@ -9,19 +8,19 @@ namespace SegurosAPI.Services.Implementacion
     public class ClienteService : ICliente
     {
 
-        private readonly DBSegurosContext context;
+        private readonly DBSegurosContext _context;
 
         public ClienteService(DBSegurosContext context)
         {
-            this.context = context;
+            this._context = context;
         }
 
-        public async Task<List<ClienteDTO>> GetList()
+        public async Task<List<ClienteDto>> GetList()
         {
             try
             {
-                var clientes = await context.Clientes.ToListAsync();
-                var listaClientes = clientes.Select(c => new ClienteDTO
+                var clientes = await _context.Clientes.ToListAsync();
+                var listaClientes = clientes.Select(c => new ClienteDto
                 {
                     Cedula = c.Cedula,
                     NombreCliente = c.NombreCliente,
@@ -37,17 +36,17 @@ namespace SegurosAPI.Services.Implementacion
             }
         }
 
-        public async Task<ClienteDTO?> Get(int idCliente)
+        public async Task<ClienteDto?> Get(int idCliente)
         {
             try
             {
-                Cliente? cliente = await context.Clientes
+                Cliente? cliente = await _context.Clientes
                 .Where(c => c.Id == idCliente)
                 .FirstOrDefaultAsync();
                 
                 return cliente == null
                     ? null
-                    : new ClienteDTO
+                    : new ClienteDto
                     {
                         Cedula = cliente.Cedula,
                         NombreCliente = cliente.NombreCliente,
@@ -61,7 +60,7 @@ namespace SegurosAPI.Services.Implementacion
                 throw ex;
             }
         }
-        public async Task<ClienteDTO> Add(ClienteDTO modelo)
+        public async Task<ClienteDto> Add(ClienteDto modelo)
         {
             try
             {
@@ -86,10 +85,10 @@ namespace SegurosAPI.Services.Implementacion
                     Edad = modelo.Edad
                 };
 
-                context.Clientes.Add(cliente);
-                await context.SaveChangesAsync();
+                _context.Clientes.Add(cliente);
+                await _context.SaveChangesAsync();
 
-                modelo.id = cliente.Id;
+                modelo.Id = cliente.Id;
 
                 return modelo;
             } catch (Exception ex)
@@ -100,10 +99,10 @@ namespace SegurosAPI.Services.Implementacion
 
         private async Task<bool> ClienteConCedulaExiste(string cedula)
         {
-            return await context.Clientes.AnyAsync(c => c.Cedula == cedula);
+            return await _context.Clientes.AnyAsync(c => c.Cedula == cedula);
         }
 
-        public async Task<bool> Update(ClienteDTO modelo, int id)
+        public async Task<bool> Update(ClienteDto modelo, int id)
         {
             try
             {
@@ -115,7 +114,7 @@ namespace SegurosAPI.Services.Implementacion
                     throw new ArgumentException("ID y otros campos requeridos deben ser proporcionados.");
                 }
 
-                var clienteExistente = await context.Clientes.FindAsync(id);
+                var clienteExistente = await _context.Clientes.FindAsync(id);
                 if (clienteExistente == null)
                 {
                     throw new ArgumentException($"No se encontró un cliente con el ID: {id}");
@@ -126,7 +125,7 @@ namespace SegurosAPI.Services.Implementacion
                 clienteExistente.Telefono = modelo.Telefono;
                 clienteExistente.Edad = modelo.Edad;
 
-                await context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
                 return true;
             }
             catch (Exception ex)
@@ -139,14 +138,14 @@ namespace SegurosAPI.Services.Implementacion
         {
             try
             {
-                var clienteExistente = await context.Clientes.FindAsync(id);
+                var clienteExistente = await _context.Clientes.FindAsync(id);
                 if (clienteExistente == null)
                 {
                     throw new ArgumentException($"No se encontró un cliente con el ID: {id}");
                 }
 
-                context.Clientes.Remove(clienteExistente);
-                await context.SaveChangesAsync();
+                _context.Clientes.Remove(clienteExistente);
+                await _context.SaveChangesAsync();
                 return true;
             } catch (Exception ex) 
             {

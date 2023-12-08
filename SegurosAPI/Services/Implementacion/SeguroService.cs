@@ -7,20 +7,20 @@ namespace SegurosAPI.Services.Implementacion
 {
     public class SeguroService : ISeguro
     {
-        private readonly DBSegurosContext context;
+        private readonly DBSegurosContext _context;
 
         public SeguroService(DBSegurosContext context)
         {
-            this.context = context;
+            this._context = context;
         }
 
 
-        public async Task<List<SeguroDTO>> GetList()
+        public async Task<List<SeguroDto>> GetList()
         {
             try
             {
-                var seguros = await context.Seguros.ToListAsync();
-                var listaSeguros = seguros.Select(s => new SeguroDTO
+                var seguros = await _context.Seguros.ToListAsync();
+                var listaSeguros = seguros.Select(s => new SeguroDto
                 {
                     NombreSeguro = s.NombreSeguro,
                     CodigoSeguro = s.CodigoSeguro,
@@ -31,35 +31,38 @@ namespace SegurosAPI.Services.Implementacion
 
                 return listaSeguros;
 
-            } catch (Exception ex)
+            }catch (Exception ex)
             {
                 throw ex;
             }
+
         }
-        public async Task<SeguroDTO?> Get(int idSeguro)
+        public async Task<SeguroDto> Get(int idSeguro)
         {
             try
             {
-                Seguro? seguro = await context.Seguros
+                var seguro = await _context.Seguros
                     .Where(s => s.Id == idSeguro)
                     .FirstOrDefaultAsync();
-                return seguro == null
-                    ? null
-                    : new SeguroDTO
-                    {
-                        NombreSeguro = seguro.NombreSeguro,
-                        CodigoSeguro = seguro.CodigoSeguro,
-                        SumaAsegurada = seguro.SumaAsegurada,
-                        Prima = seguro.Prima
-                    };
+                
+                if (seguro == null)
+                {
+                    throw new ArgumentException($"No se encontró un seguro con el ID: {idSeguro}");
+                }
+                return new SeguroDto
+                {
+                    NombreSeguro = seguro.NombreSeguro,
+                    CodigoSeguro = seguro.CodigoSeguro,
+                    SumaAsegurada = seguro.SumaAsegurada,
+                    Prima = seguro.Prima
+                };
             } catch (Exception ex)
             {
                 throw ex;
             }
-
         }
 
-        public async Task<SeguroDTO> Add(SeguroDTO modelo)
+        public async Task<SeguroDto> Add(SeguroDto modelo)
         {
             try
             {
@@ -86,10 +89,10 @@ namespace SegurosAPI.Services.Implementacion
                 };
 
 
-                context.Seguros.Add(seguro);
-                await context.SaveChangesAsync();
+                _context.Seguros.Add(seguro);
+                await _context.SaveChangesAsync();
 
-                modelo.id = seguro.Id;
+                modelo.Id = seguro.Id;
 
                 return modelo;
             }
@@ -101,10 +104,10 @@ namespace SegurosAPI.Services.Implementacion
 
         private async Task<bool> SeguroExiste(string codigo)
         {
-            return await context.Seguros.AnyAsync(c => c.CodigoSeguro == codigo);
+            return await _context.Seguros.AnyAsync(c => c.CodigoSeguro == codigo);
         }
 
-        public async Task<bool> Update(SeguroDTO modelo, int idSeguro)
+        public async Task<bool> Update(SeguroDto modelo, int idSeguro)
         {
             try
             {
@@ -118,7 +121,7 @@ namespace SegurosAPI.Services.Implementacion
                     throw new ArgumentException("ID y otros campos requeridos deben ser proporcionados.");
                 }
 
-                var seguroExistente = await context.Seguros.FindAsync(idSeguro);
+                var seguroExistente = await _context.Seguros.FindAsync(idSeguro);
                 if (seguroExistente == null)
                 {
                     throw new ArgumentException($"No se encontró un seguro con el ID: {idSeguro}");
@@ -129,7 +132,7 @@ namespace SegurosAPI.Services.Implementacion
                 seguroExistente.SumaAsegurada = modelo.SumaAsegurada;
                 seguroExistente.Prima = modelo.Prima;
 
-                await context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
                 return true;
             }
             catch (Exception ex)
@@ -142,14 +145,14 @@ namespace SegurosAPI.Services.Implementacion
         {
             try
             {
-                var seguroExistente = await context.Seguros.FindAsync(idSeguro);
+                var seguroExistente = await _context.Seguros.FindAsync(idSeguro);
                 if (seguroExistente == null)
                 {
                     throw new ArgumentException($"No se encontró un cliente con el ID: {idSeguro}");
                 }
 
-                context.Seguros.Remove(seguroExistente);
-                await context.SaveChangesAsync();
+                _context.Seguros.Remove(seguroExistente);
+                await _context.SaveChangesAsync();
                 return true;
             }
             catch (Exception ex)
@@ -158,4 +161,6 @@ namespace SegurosAPI.Services.Implementacion
             }
         }
     }
+
+    
 }

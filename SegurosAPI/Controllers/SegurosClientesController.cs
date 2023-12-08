@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SegurosAPI.DTOs;
 using SegurosAPI.Services.Contrato;
-using SegurosAPI.Services.Implementacion;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -12,20 +11,20 @@ namespace SegurosAPI.Controllers
     public class SegurosClientesController : ControllerBase
     {
 
-        private readonly ISegurosClientes aseguradosService;
+        private readonly ISegurosClientes _aseguradosService;
 
         public SegurosClientesController(ISegurosClientes aseguradosService)
         {
-            this.aseguradosService = aseguradosService;
+            this._aseguradosService = aseguradosService;
         }
 
         // GET: api/<SegurosClientesController>
         [HttpGet(Name = "GetAsegurados")]
-        public async Task<ActionResult<List<SegurosClienteDTO>>> GetAsegurados()
+        public async Task<ActionResult<List<SegurosClienteDto>>> GetAsegurados()
         {
             try
             {
-                var asegurados = await aseguradosService.GetSegurosClientesList();
+                var asegurados = await _aseguradosService.GetSegurosClientesList();
                 return Ok(asegurados);
 
             }
@@ -37,11 +36,11 @@ namespace SegurosAPI.Controllers
 
         // GET api/<SegurosClientesController>/5
         [HttpGet("{id}", Name = "GetAseguradosById")]
-        public async Task<ActionResult<SegurosClienteDTO>> GetAseguradosById(int id)
+        public async Task<ActionResult<SegurosClienteDto>> GetAseguradosById(int id)
         {
             try
             {
-                var asegurados = await aseguradosService.GetSegurosCliente(id);
+                var asegurados = await _aseguradosService.GetSegurosCliente(id);
                 return asegurados != null
                     ? Ok(asegurados)
                     : NotFound($"No existe un asegurado con ese id: {id}");
@@ -51,13 +50,13 @@ namespace SegurosAPI.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<ActionResult<SegurosClienteDTO>> AddSegurosCliente([FromBody] CrearAseguradoDTO modelo)
+        [HttpPost(Name = "AddSegurosCliente")]
+        public async Task<ActionResult<SegurosClienteDto>> AddSegurosCliente([FromBody] CrearAseguradoDto modelo)
         {
             try
             {
-                var asegurados = await aseguradosService.AddSegurosCliente(modelo);
-                return Ok();
+                var asegurados = await _aseguradosService.AddSegurosCliente(modelo);
+                return Ok(asegurados);
             }
             catch (InvalidOperationException ex)
             {
@@ -72,11 +71,11 @@ namespace SegurosAPI.Controllers
 
         // PUT api/<SegurosClientesController>/5
         [HttpPut("{id}", Name = "PutAsegurado")]
-        public async Task<ActionResult> PutAsegurado([FromBody] CrearAseguradoDTO modelo, int id)
+        public async Task<ActionResult> PutAsegurado([FromBody] CrearAseguradoDto modelo, int id)
         {
             try
             {
-                await aseguradosService.UpdateSegurosCliente(modelo, id);
+                await _aseguradosService.UpdateSegurosCliente(modelo, id);
                 return NoContent();
 
             } catch (ArgumentException ex)
@@ -91,7 +90,7 @@ namespace SegurosAPI.Controllers
         {
             try
             {
-                await aseguradosService.DeleteSegurosCliente(id);
+                await _aseguradosService.DeleteSegurosCliente(id);
                 return NoContent();
             } catch(ArgumentException ex)
             {

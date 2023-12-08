@@ -1,8 +1,8 @@
 ﻿namespace SegurosAPI.DTOs
 {
-    public class SeguroDTO
+    public class SeguroDto
     {
-        internal int id;
+        internal int Id;
         public string NombreSeguro { get; set; } = null!;
         public string CodigoSeguro { get; set; } = null!;
         public decimal SumaAsegurada { get; set; }

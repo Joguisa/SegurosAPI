@@ -1,42 +1,41 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Scaffolding;
 using SegurosAPI.DTOs;
 using SegurosAPI.Models;
 using SegurosAPI.Services.Contrato;
-using System.Linq;
+
 namespace SegurosAPI.Services.Implementacion
 {
     public class SegurosClienteServicio : ISegurosClientes
     {
-        private readonly DBSegurosContext context;
+        private readonly DBSegurosContext _context;
 
         public SegurosClienteServicio(DBSegurosContext context)
         {
-            this.context = context;
+            this._context = context;
         }
 
-        public async Task<List<SegurosClienteDTO>> GetSegurosClientesList()
+        public async Task<List<SegurosClienteDto>> GetSegurosClientesList()
         {
-            var segurosClientes = await context.SegurosClientes
+            var segurosClientes = await _context.SegurosClientes
                 .Include(sc => sc.Cliente)
                 .Include(sc => sc.Seguro)
                 .ToListAsync();
 
-            var segurosClienteDTOs = segurosClientes.Select(sc => new SegurosClienteDTO
+            var segurosClienteDtos = segurosClientes.Select(sc => new SegurosClienteDto
             {
                 Id = sc.Id,
-                Cliente = new ClienteDTO
+                Cliente = new ClienteDto
                 {
-                    id = sc.Id,
+                    Id = sc.Id,
                     Cedula = sc.Cliente.Cedula,
                     NombreCliente = sc.Cliente.NombreCliente,
                     Telefono = sc.Cliente.Telefono,
                     Edad = sc.Cliente.Edad
 
                 },
-                Seguro = new SeguroDTO
+                Seguro = new SeguroDto
                 {
-                    id = sc.Id,
+                    Id = sc.Id,
                     NombreSeguro = sc.Seguro.NombreSeguro,
                     CodigoSeguro = sc.Seguro.CodigoSeguro,
                     SumaAsegurada = sc.Seguro.SumaAsegurada,
@@ -44,37 +43,35 @@ namespace SegurosAPI.Services.Implementacion
                 }
             }).ToList();
 
-            return segurosClienteDTOs;
+            return segurosClienteDtos;
         }
 
-        public async Task<SegurosClienteDTO?> GetSegurosCliente(int idSegurosCliente)
+        public async Task<SegurosClienteDto?> GetSegurosCliente(int idSegurosCliente)
         {
             try
             {
-                SegurosCliente? sc = await context.SegurosClientes
+                var sc = await _context.SegurosClientes
                     .Include(s => s.Cliente)
                     .Include(s => s.Seguro)
                     .Where(a => a.Id == idSegurosCliente)
                     .FirstOrDefaultAsync();
-
-
-                return sc == null
-                    ? null
-                    : new SegurosClienteDTO
+                
+                if (sc == null)
+                {
+                    throw new ArgumentException($"No se encontró un seguro con el ID: {idSegurosCliente}");
+                }
+                
+                return new SegurosClienteDto
                     {
                         Id = idSegurosCliente,
-                        Cliente = sc.Cliente == null
-                            ? null
-                            : new ClienteDTO
+                            Cliente = new ClienteDto
                             {
                                 Cedula = sc.Cliente.Cedula,
                                 NombreCliente = sc.Cliente.NombreCliente,
                                 Telefono = sc.Cliente.Telefono,
                                 Edad = sc.Cliente.Edad
                             },
-                        Seguro = sc.Seguro == null
-                            ? null
-                            : new SeguroDTO
+                        Seguro =  new SeguroDto
                             {
                                 NombreSeguro = sc.Seguro.NombreSeguro,
                                 CodigoSeguro = sc.Seguro.CodigoSeguro,
@@ -89,7 +86,7 @@ namespace SegurosAPI.Services.Implementacion
             }
         }
 
-        public async Task<SegurosClienteDTO> AddSegurosCliente(CrearAseguradoDTO modelo)
+        public async Task<SegurosClienteDto> AddSegurosCliente(CrearAseguradoDto modelo)
         {
             try
             {
@@ -103,17 +100,34 @@ namespace SegurosAPI.Services.Implementacion
                     ClienteId = modelo.ClienteId,
                     SeguroId = modelo.SeguroId,
                 };
+                
+                // Obtener los datos del cliente y seguro después de guardar en la base de datos
+                var cliente = await _context.Clientes.FindAsync(asegurado.ClienteId);
+                var seguro = await _context.Seguros.FindAsync(asegurado.SeguroId);
 
-                context.SegurosClientes.Add(asegurado);
-                await context.SaveChangesAsync();
+                _context.SegurosClientes.Add(asegurado);
+                await _context.SaveChangesAsync();
 
-                var resultDTO = new SegurosClienteDTO
+                var resultDto = new SegurosClienteDto
                 {
-                    Cliente = new ClienteDTO { id = asegurado.ClienteId },
-                    Seguro = new SeguroDTO { id = asegurado.SeguroId }
+                    Id = asegurado.Id,
+                    Cliente = new ClienteDto
+                    {
+                        Cedula = cliente.Cedula,
+                        NombreCliente = cliente.NombreCliente,
+                        Telefono = cliente.Telefono,
+                        Edad = cliente.Edad
+                    },
+                    Seguro = new SeguroDto
+                    {
+                        NombreSeguro = seguro.NombreSeguro,
+                        CodigoSeguro = seguro.CodigoSeguro,
+                        SumaAsegurada = seguro.SumaAsegurada,
+                        Prima = seguro.Prima
+                    }
                 };
 
-                return resultDTO;
+                return resultDto;
             }
             catch (Exception ex)
             {
@@ -121,32 +135,32 @@ namespace SegurosAPI.Services.Implementacion
             }
         }
 
-        private async Task<bool> AseguradoExiste(CrearAseguradoDTO modelo)
+        private async Task<bool> AseguradoExiste(CrearAseguradoDto modelo)
         {
             // Validar si ya existe un asegurado con la combinación de ClienteId y SeguroId
-            return await context.SegurosClientes.AnyAsync(s =>
+            return await _context.SegurosClientes.AnyAsync(s =>
                 s.ClienteId == modelo.ClienteId && s.SeguroId == modelo.SeguroId);
         }
 
-        public async Task<bool> UpdateSegurosCliente(CrearAseguradoDTO modelo, int id)
+        public async Task<bool> UpdateSegurosCliente(CrearAseguradoDto modelo, int id)
         {
 
             // Validar que el SeguroId exista
-            var seguroExistente = await context.Seguros.FindAsync(modelo.SeguroId);
+            var seguroExistente = await _context.Seguros.FindAsync(modelo.SeguroId);
             if (seguroExistente == null)
             {
                 throw new ArgumentException($"No se encontró un seguro con el ID: {modelo.SeguroId}");
             }
 
             // Validar que el ClienteId exista
-            var clienteExistente = await context.Clientes.FindAsync(modelo.ClienteId);
+            var clienteExistente = await _context.Clientes.FindAsync(modelo.ClienteId);
             if (clienteExistente == null)
             {
                 throw new ArgumentException($"No se encontró un cliente con el ID: {modelo.ClienteId}");
             }
 
 
-            var asegurado = await context.SegurosClientes.FindAsync(id);
+            var asegurado = await _context.SegurosClientes.FindAsync(id);
             if (asegurado == null)
             {
                 throw new ArgumentException($"No se encontró un seguro con el ID: {id}");
@@ -155,7 +169,7 @@ namespace SegurosAPI.Services.Implementacion
             asegurado.SeguroId = modelo.SeguroId;
             asegurado.ClienteId = modelo.ClienteId;
 
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             return true;
         }
 
@@ -163,14 +177,14 @@ namespace SegurosAPI.Services.Implementacion
         {
             try
             {
-                var aseguradoExiste = await context.SegurosClientes.FindAsync(id);
+                var aseguradoExiste = await _context.SegurosClientes.FindAsync(id);
                 if (aseguradoExiste == null)
                 {
                     throw new ArgumentException($"No se encontró un asegurado con el ID: {id}");
                 }
 
-                context.SegurosClientes.Remove(aseguradoExiste);
-                await context.SaveChangesAsync();
+                _context.SegurosClientes.Remove(aseguradoExiste);
+                await _context.SaveChangesAsync();
                 return true;
             } catch (Exception ex)
             {

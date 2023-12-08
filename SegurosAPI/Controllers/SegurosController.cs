@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SegurosAPI.DTOs;
 using SegurosAPI.Services.Contrato;
-using SegurosAPI.Services.Implementacion;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -11,21 +10,21 @@ namespace SegurosAPI.Controllers
     [ApiController]
     public class SegurosController : ControllerBase
     {
-        private readonly ISeguro seguroService;
+        private readonly ISeguro _seguroService;
 
         public SegurosController(ISeguro seguroService)
         {
-            this.seguroService = seguroService;
+            this._seguroService = seguroService;
         }
 
 
         // GET: api/<SegurosController>
-        [HttpGet(Name = "listarSeguros" )]
-        public async Task<ActionResult<List<SeguroDTO>>> listarSeguros()
+        [HttpGet(Name = "ListarSeguros" )]
+        public async Task<ActionResult<List<SeguroDto>>> ListarSeguros()
         {
             try
             {
-                var seguros = await seguroService.GetList();
+                var seguros = await _seguroService.GetList();
                 return seguros;
             } catch (ArgumentException ex)
             {
@@ -36,14 +35,12 @@ namespace SegurosAPI.Controllers
 
         // GET api/<SegurosController>/5
         [HttpGet("{id}", Name = "GetSeguro")]
-        public async Task<ActionResult<SeguroDTO>> GetSeguro(int id)
+        public async Task<ActionResult<SeguroDto>> GetSeguro(int id)
         {
             try
             {
-                var seguro = await seguroService.Get(id);
-                return seguro != null
-                    ? Ok(seguro)
-                    : NotFound($"No existe un seguro con ese id: {id}");
+                var seguro = await _seguroService.Get(id);
+                return Ok(seguro);
             }
             catch (ArgumentException ex)
             {
@@ -53,11 +50,11 @@ namespace SegurosAPI.Controllers
 
         // POST api/<SegurosController>
         [HttpPost(Name = "PostSeguro")]
-        public async Task<ActionResult> PostSeguro([FromBody] SeguroDTO seguroDTO)
+        public async Task<ActionResult> PostSeguro([FromBody] SeguroDto seguroDto)
         {
             try
             {
-                await seguroService.Add(seguroDTO);
+                await _seguroService.Add(seguroDto);
                 return NoContent();
             }
             catch (ArgumentException ex)
@@ -68,11 +65,11 @@ namespace SegurosAPI.Controllers
 
         // PUT api/<SegurosController>/5
         [HttpPut("{id}", Name = "PutSeguro")]
-        public async Task<ActionResult> PutSeguro(int id, [FromBody] SeguroDTO seguroDTO)
+        public async Task<ActionResult> PutSeguro(int id, [FromBody] SeguroDto seguroDto)
         {
             try
             {
-                await seguroService.Update(seguroDTO, id);
+                await _seguroService.Update(seguroDto, id);
                 return NoContent();
             } catch (ArgumentException ex)
             {
@@ -86,7 +83,7 @@ namespace SegurosAPI.Controllers
         {
             try
             {
-                await seguroService.Delete(id);
+                await _seguroService.Delete(id);
                 return NoContent();
             } catch (ArgumentException ex)
             {
